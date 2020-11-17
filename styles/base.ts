@@ -11,15 +11,27 @@ export default StyleSheet.create({
     borderTopWidth: 1,
     borderColor: "lightgrey",
   },
+  wrapperTitle: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    height: 40,
+    borderBottomWidth: 1,
+    borderTopWidth: 1,
+    borderColor: "lightgrey",
+  },
+  iconAbout: {
+    alignSelf: "center",
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 15,
+  },
   title: {
     fontSize: 30,
     textAlign: "center",
-    paddingVertical: 20,
-    backgroundColor: "whitesmoke",
-    shadowColor: "lightgrey",
-    shadowRadius: 15,
     color: "lightgrey",
     fontWeight: "bold",
+    borderColor: "grey",
   },
   titleLands: {
     fontSize: 15,
@@ -28,8 +40,12 @@ export default StyleSheet.create({
   btn: {
     width: "25%",
   },
+  btnText: {
+    color: "red",
+  },
   btnLands: {
     paddingVertical: 0,
+    color: "red",
   },
   btnTextLands: {
     fontSize: 15,

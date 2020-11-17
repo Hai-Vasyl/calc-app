@@ -1,10 +1,10 @@
-import { StatusBar } from "expo-status-bar"
 import React, { useState } from "react"
-import { Text, View, Dimensions } from "react-native"
-import PrimButton from "./components/PrimButton"
+import { Text, View, Dimensions, Modal } from "react-native"
 import styles from "./styles/base"
-import InputView from "./components/InputView"
-import btnData from "./data/buttons"
+import MainPage from "./pages/Main"
+import AboutPage from "./pages/About"
+import Button from "./components/Button"
+import { Icon } from "react-native-elements"
 
 const App: React.FC = () => {
   const [dimensions, setDimensions] = useState({
@@ -13,7 +13,9 @@ const App: React.FC = () => {
   })
 
   const [input, setInput] = useState("0")
+  const [calcStr, setCalcStr] = useState("0")
   const [result, setResult] = useState(0)
+  const [modalVisible, setModalVisible] = useState(false)
 
   const _onLayout = () => {
     setDimensions({
@@ -29,22 +31,69 @@ const App: React.FC = () => {
   }
 
   const calculate = (value: string) => {
-    const calcStr = input === "0" ? value : `${input}${value}`
-    setInput(calcStr)
-    calcResult(calcStr)
+    let calcVal = value
+    let inputVal = value
+
+    if (value === "sqrt") {
+      if (calcStr === "0") {
+        calcVal = "0**(1/"
+        inputVal = "0^(1/"
+      } else {
+        calcVal = "**(1/"
+        inputVal = "^(1/"
+      }
+    } else if (value === "pow") {
+      if (calcStr === "0") {
+        calcVal = "0**"
+        inputVal = "0^"
+      } else {
+        calcVal = "**"
+        inputVal = "^"
+      }
+    }
+
+    let newCalcStr = calcStr === "0" ? calcVal : `${calcStr}${calcVal}`
+    let inputStr = input === "0" ? inputVal : `${input}${inputVal}`
+    setInput(inputStr)
+    setCalcStr(newCalcStr)
+    calcResult(newCalcStr)
   }
 
   const clear = () => {
     setInput("0")
+    setCalcStr("0")
     setResult(0)
+  }
+
+  const toggleModal = () => {
+    setModalVisible((prev) => !prev)
   }
 
   const clearOneSumbol = () => {
     if (input !== "0") {
-      const calcStr = input.slice(0, -1)
-      const result = calcStr.length ? calcStr : "0"
-      setInput(result)
-      calcResult(result)
+      let newInput = input
+      let newCalcStr = calcStr
+
+      if (input.slice(-4) === "^(1/") {
+        newInput = input.slice(0, -4)
+        newCalcStr = calcStr.slice(0, -5)
+      } else if (input.slice(-1) === "^") {
+        newInput = input.slice(0, -1)
+        newCalcStr = calcStr.slice(0, -2)
+      } else {
+        newInput = input.slice(0, -1)
+        newCalcStr = calcStr.slice(0, -1)
+      }
+
+      let resultCalcStr = newCalcStr
+      let resultInput = newInput
+      if (!newCalcStr.length) {
+        resultInput = resultCalcStr = "0"
+      }
+
+      setInput(resultInput)
+      setCalcStr(resultCalcStr)
+      calcResult(resultCalcStr)
     }
   }
 
@@ -52,37 +101,26 @@ const App: React.FC = () => {
 
   return (
     <View style={styles.container} onLayout={_onLayout}>
-      <Text style={[styles.title, isLandscape && styles.titleLands]}>
-        Calculator
-      </Text>
-      <View>
-        <InputView
-          result={result}
-          input={input}
-          isLandscape={isLandscape}
-          clearOneSumbol={clearOneSumbol}
+      <View style={styles.wrapperTitle}>
+        <Text style={[styles.title, isLandscape && styles.titleLands]}>
+          Calculator
+        </Text>
+        <Button
+          toggleModal={toggleModal}
+          title={<Icon style={styles.iconAbout} name='info' color='#517fa4' />}
         />
-        <View style={styles.wrapperBtns}>
-          {btnData.map((btn) => {
-            return (
-              <PrimButton
-                handlePress={() =>
-                  btn.title === "C" ? clear() : calculate(btn.title)
-                }
-                exStyle={[
-                  styles.btn,
-                  btn.exStyle,
-                  isLandscape && styles.btnLands,
-                ]}
-                txStyle={isLandscape ? styles.btnTextLands : {}}
-                key={btn.title}
-                title={btn.title}
-              />
-            )
-          })}
-        </View>
       </View>
-      <StatusBar style='auto' />
+      <MainPage
+        result={result}
+        input={input}
+        isLandscape={isLandscape}
+        clearOneSumbol={clearOneSumbol}
+        clear={clear}
+        calculate={calculate}
+      />
+      <Modal animationType='slide' transparent={true} visible={modalVisible}>
+        <AboutPage toggleModal={toggleModal} />
+      </Modal>
     </View>
   )
 }
